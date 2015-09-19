@@ -1,0 +1,32 @@
+desc "プロジェクトセットアップ"
+task :setup do
+    Rake::Task['init:gem_bundle'].invoke
+    Rake::Task['init:cocoapods'].invoke
+end
+
+desc "mergepbxのインストール"
+task :mergepbx do
+    Rake::Task['mergepbx:install'].invoke
+end
+
+namespace "init" do
+    task "gem_bundle" do
+        sh "bundle install --path vendor/bundle"
+    end
+
+    task "cocoapods" do
+        sh "bundle exec pod --version
+            bundle exec pod install"
+    end
+end
+
+namespace "mergepbx" do
+    task :install do
+        EXECUTABLE_URL = "https://github.com/simonwagner/mergepbx/releases/download/v0.9/mergepbx"
+        INSTALL_PATH = Dir::getwd + "/mergepbx"
+        sh "curl --silent -L #{EXECUTABLE_URL} > #{INSTALL_PATH}"
+        sh "chmod +x #{INSTALL_PATH}"
+        sh "git config merge.mergepbx.name \'Xcode project files merger\'"
+        sh "git config merge.mergepbx.driver \'#{INSTALL_PATH} %O %A %B\'"
+    end
+end
